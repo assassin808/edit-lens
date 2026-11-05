@@ -59,8 +59,9 @@ Screening set: 200 GSM8K + 200 MATH-500 problems × 2 samples, 16k cap, Astra's 
 vs 0.312), using 5–7× fewer tokens.** At Astra's full 32k × 4 protocol p50c reaches 0.481 on MATH-500 (their table), still below
 no-think 0.512 here. The edit's gain is measured against a thinking mode that is broken for this model; it does not make the
 model better than its own non-thinking mode. Forcing `</think>` at 4k or 8k tokens, with no weight change, gets 0.52–0.54 on
-GSM8K (vs 0.57) and 0.24–0.27 on MATH-500 (vs 0.31): "simply forcing early termination", which Astra's report argues against,
-recovers most of the gain. Repetition penalty is either too weak (1.1: half the loops remain) or destructive (1.2: accuracy 0.01,
+GSM8K (vs 0.57) and 0.32–0.34 on MATH-500 (vs 0.31): "simply forcing early termination", which Astra's report argues against,
+recovers all of the gain on MATH-500 and most of it on GSM8K (the remaining gap on GSM8K: forced termination still leaves
+41 % loop endings inside the answer phase, the edit leaves 7 %). Repetition penalty is either too weak (1.1: half the loops remain) or destructive (1.2: accuracy 0.01,
 22 % finish without a box, because digits and `\boxed` are repeated tokens too). (Astra's own evaluate.py notes the same for an earlier run: "thinking looped at
 0.8B; the evaluation uses the model card's NON-thinking benchmark setting instead".)
 
