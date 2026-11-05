@@ -35,11 +35,52 @@ Rescues: 99 / 79 / 36 / 42 / 10 on GSM8K / MATH / Minerva / Olympiad / AMC, ever
   Copy attention unchanged; not a copy-head story. The probe reads edited loop states as not-loop (0.85 → 0.08) while their
   distance to productive states is unchanged: the loop flag is cleared, the state is not returned to normal reasoning.
 
-## 5. Controls (Test 6) — `notes/q4_simpler_intervention.md`, `notes/q4b_tf_sweep.md`, screening table TBD
+## 5. Controls (Test 6) — `notes/q4_simpler_intervention.md`, `notes/q4b_tf_sweep.md`, `notes/screen/table_*.md`
 
-Teacher-forced (loop-position NLL, base 0.021): α = 1 +0.005, 2 +0.011, 4 +0.034, 6 +0.093, 8 +0.312; 20 random directions
-≤ +0.0004; random columns ≤ +0.001; ungated −u bias needs 6× the collateral. Generation (50 GSM8K): base 0.14, α = 2 0.32, α = 6 0.56.
-[screening table: `python scripts/summarize_screen.py` → base / p50c / α / top-64 / random / p10c / p25c]
+Screening set as in §6 (200 + 200 problems × 2 samples, 16k cap, strict grading). All variants use the rule w' = w − α·d(dᵀw).
+
+### Dose (Astra's 64 columns, d = u)
+
+| variant | GSM8K completion | GSM8K acc | acc on completed | loop-end | MATH-500 completion | MATH-500 acc | acc on completed | loop-end |
+|---|---|---|---|---|---|---|---|---|
+| base (α = 0) | 0.12 | 0.147 | 0.94 | 0.86 | 0.07 | 0.072 | 0.96 | 0.86 |
+| Astra cols, α = 1 (remove u component) | 0.24 | 0.247 | 0.97 | 0.73 | 0.11 | 0.122 | 1.00 | 0.76 |
+| Astra cols, α = 2 (flip) | 0.43 | 0.417 | 0.94 | 0.49 | 0.20 | 0.203 | 1.00 | 0.59 |
+| Astra cols, α = 4 | 0.70 | 0.588 | 0.84 | 0.14 | 0.33 | 0.312 | 0.95 | 0.23 |
+| **Astra cols, α = 6 = p50c** | 0.76 | 0.570 | 0.75 | 0.07 | 0.34 | 0.312 | 0.90 | 0.09 |
+| Astra cols, α = 8 | 0.81 | 0.595 | 0.74 | 0.01 | 0.34 | 0.285 | 0.84 | 0.06 |
+
+Completion rises monotonically with α (0.12 → 0.81); accuracy plateaus from α = 4 (0.59 / 0.57 / 0.60 on GSM8K, 0.31 / 0.31 / 0.29
+on MATH-500). Removing the u-component (α = 1) gives a quarter of the effect; the gain needs the over-shoot. At α = 8 collateral
+appears: accuracy on completed MATH-500 problems drops 0.96 → 0.84 and 4 % finish without a box. Astra's α = 6 is on the plateau,
+one step before the damage. Teacher-forced loop-NLL predicted this ordering exactly (α 1/2/4/6/8 → +0.005/+0.011/+0.034/+0.093/+0.312).
+
+### Direction and columns (α = 6 unless noted)
+
+| variant | GSM8K completion | GSM8K acc | acc on completed | loop-end | MATH-500 completion | MATH-500 acc | acc on completed | loop-end |
+|---|---|---|---|---|---|---|---|---|
+| **p50c** (Astra cols, u, α = 6) | 0.76 | 0.570 | 0.75 | 0.07 | 0.34 | 0.312 | 0.90 | 0.09 |
+| our top-64 by combined score, u, α = 6 | 0.74 | 0.600 | 0.81 | 0.08 | 0.34 | 0.312 | 0.93 | 0.13 |
+| our top-64 by d′, u, α = 6 | 0.70 | 0.573 | 0.82 | 0.11 | 0.30 | 0.290 | 0.97 | 0.22 |
+| our top-64 by |uᵀw|, u, α = 6 | 0.69 | 0.557 | 0.81 | 0.17 | 0.34 | 0.315 | 0.93 | 0.20 |
+| Astra cols, random direction #0, α = 6 | 0.13 | 0.135 | 0.92 | 0.85 | 0.09 | 0.100 | 1.00 | 0.83 |
+| Astra cols, random direction #1, α = 6 | 0.13 | 0.145 | 0.96 | 0.85 | 0.08 | 0.085 | 1.00 | 0.84 |
+| Astra cols, random direction #2, α = 6 | 0.11 | 0.138 | 1.00 | 0.87 | 0.08 | 0.085 | 1.00 | 0.87 |
+| Astra cols, random direction #3, α = 6 | 0.14 | 0.142 | 0.96 | 0.85 | 0.07 | 0.072 | 1.00 | 0.89 |
+| Astra cols, random direction #4, α = 6 | 0.10 | 0.110 | 1.00 | 0.90 | 0.09 | 0.098 | 1.00 | 0.84 |
+| 64 random cols, u, α = 6 | 0.17 | 0.175 | 0.93 | 0.79 | 0.12 | 0.130 | 1.00 | 0.77 |
+| all 3584 cols, u, α = 1.5 (p10c-style rank-1) | 0.49 | 0.443 | 0.88 | 0.42 | 0.22 | 0.217 | 1.00 | 0.52 |
+
+- **The direction is the whole story**: five random unit directions on Astra's own columns are indistinguishable from base
+  (acc 0.11–0.15, loop-end 0.85–0.90); random columns with u are also ≈ base. Teacher-forced: 20/20 random directions ≤ 0.4 % of
+  Astra's effect.
+- **The particular columns are not**: our three re-rankings of the top-64 (by loop selectivity, by |uᵀw|, or both) match Astra's
+  columns in generation (0.56–0.60 vs 0.57 on GSM8K; 0.29–0.32 vs 0.31 on MATH-500). Astra's index-skewed choice (median index
+  364 / 354 of 3584) is therefore one of many equivalent choices; any ~64 loop-selective neurons carrying u will do.
+- The p10c-style full-matrix rank-1 reflection (all columns, α = 1.5) gets about half the gain (0.44 / 0.22), consistent with
+  Astra's own p10c (12.3 on MATH-500 at 32k): a weaker, ungated version of the same thing.
+- Not a simpler intervention: an ungated constant −u bias needs ~6× the collateral (teacher-forced, §Q4); the HF steering run
+  (c = 0.5 / 1 / 2 on 100 GSM8K problems) is at the end of the queue.
 
 ## 6. Decoding baselines (Test 7) — screening table TBD
 
