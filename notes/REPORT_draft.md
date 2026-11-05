@@ -45,19 +45,23 @@ Teacher-forced (loop-position NLL, base 0.021): α = 1 +0.005, 2 +0.011, 4 +0.03
 
 Screening set: 200 GSM8K + 200 MATH-500 problems × 2 samples, 16k cap, Astra's prompt / sampling / grader (strict).
 
-| config | GSM8K completion | GSM8K acc | MATH-500 completion | MATH-500 acc | mean tokens (GSM8K / MATH) |
-|---|---|---|---|---|---|
-| base, thinking on | 0.12 | 0.147 | 0.07 | 0.072 | 14983 / 15630 |
-| **p50c, thinking on** | 0.76 | 0.570 | 0.34 | 0.312 | 9964 / 13759 |
-| **base, thinking off** | 0.99 | **0.555** | 0.83 | **0.512** | 1513 / 5995 |
-| base, repetition penalty 1.1 / 1.2 | TBD | | | | |
-| base, thinking budget 4k / 8k | TBD | | | | |
-| base + u-steering c = 0.5 / 1 / 2 | TBD | | | | |
+| config | GSM8K completion | GSM8K acc | GSM8K loop-end | MATH-500 completion | MATH-500 acc | MATH-500 loop-end | mean tokens (GSM8K / MATH) |
+|---|---|---|---|---|---|---|---|
+| base, thinking on | 0.12 | 0.147 | 0.86 | 0.07 | 0.072 | 0.86 | 14983 / 15630 |
+| **p50c, thinking on** | 0.76 | 0.570 | 0.07 | 0.34 | 0.312 | 0.09 | 9964 / 13759 |
+| **base, thinking off** | 0.99 | 0.555 | 0.00 | 0.83 | 0.512 | 0.05 | 1513 / 5995 |
+| base, repetition penalty 1.1 | 0.47 | 0.410 | 0.43 | 0.21 | 0.200 | 0.44 | 11805 / 14278 |
+| base, repetition penalty 1.2 | 0.31 | 0.010 | 0.38 | 0.24 | 0.013 | 0.39 | 12935 / 13708 |
+| base, thinking budget 4k (forced </think>) | 0.57 | 0.517 | 0.41 | 0.33 | 0.315 | 0.60 | 9531 / 12526 |
+| base, thinking budget 8k | 0.58 | 0.537 | 0.41 | 0.35 | 0.343 | 0.55 | 11461 / 13475 |
 
 **Simply disabling thinking matches the edited model on GSM8K (0.555 vs 0.570) and beats it on MATH-500 at the 16k cap (0.512
 vs 0.312), using 5–7× fewer tokens.** At Astra's full 32k × 4 protocol p50c reaches 0.481 on MATH-500 (their table), still below
 no-think 0.512 here. The edit's gain is measured against a thinking mode that is broken for this model; it does not make the
-model better than its own non-thinking mode. (Astra's own evaluate.py notes the same for an earlier run: "thinking looped at
+model better than its own non-thinking mode. Forcing `</think>` at 4k or 8k tokens, with no weight change, gets 0.52–0.54 on
+GSM8K (vs 0.57) and 0.24–0.27 on MATH-500 (vs 0.31): "simply forcing early termination", which Astra's report argues against,
+recovers most of the gain. Repetition penalty is either too weak (1.1: half the loops remain) or destructive (1.2: accuracy 0.01,
+22 % finish without a box, because digits and `\boxed` are repeated tokens too). (Astra's own evaluate.py notes the same for an earlier run: "thinking looped at
 0.8B; the evaluation uses the model card's NON-thinking benchmark setting instead".)
 
 ## 7. Generality and side effects (Q6) — `notes/q6_side_effects_generality.md`

@@ -24,6 +24,54 @@
   "mean_tokens": 15630.0825
  },
  {
+  "tag": "base_budget4k",
+  "set": "gsm8k",
+  "n": 400,
+  "completion": 0.5675,
+  "acc": 0.5175,
+  "acc_lenient": 0.5775,
+  "acc_on_completed": 0.9118942731277533,
+  "loop_end": 0.405,
+  "no_box": 0.0125,
+  "mean_tokens": 9530.8575
+ },
+ {
+  "tag": "base_budget4k",
+  "set": "math500",
+  "n": 400,
+  "completion": 0.325,
+  "acc": 0.315,
+  "acc_lenient": 0.4225,
+  "acc_on_completed": 0.9615384615384616,
+  "loop_end": 0.6,
+  "no_box": 0.0025,
+  "mean_tokens": 12525.88
+ },
+ {
+  "tag": "base_budget8k",
+  "set": "gsm8k",
+  "n": 400,
+  "completion": 0.5775,
+  "acc": 0.5375,
+  "acc_lenient": 0.595,
+  "acc_on_completed": 0.9307359307359307,
+  "loop_end": 0.41,
+  "no_box": 0.0075,
+  "mean_tokens": 11460.68
+ },
+ {
+  "tag": "base_budget8k",
+  "set": "math500",
+  "n": 400,
+  "completion": 0.35,
+  "acc": 0.3425,
+  "acc_lenient": 0.39,
+  "acc_on_completed": 0.9785714285714285,
+  "loop_end": 0.545,
+  "no_box": 0.0075,
+  "mean_tokens": 13475.3475
+ },
+ {
   "tag": "base_nothink",
   "set": "gsm8k",
   "n": 400,
@@ -46,6 +94,54 @@
   "loop_end": 0.0525,
   "no_box": 0.0,
   "mean_tokens": 5994.535
+ },
+ {
+  "tag": "base_rep1.1",
+  "set": "gsm8k",
+  "n": 400,
+  "completion": 0.4675,
+  "acc": 0.41,
+  "acc_lenient": 0.5225,
+  "acc_on_completed": 0.8770053475935828,
+  "loop_end": 0.435,
+  "no_box": 0.015,
+  "mean_tokens": 11805.47
+ },
+ {
+  "tag": "base_rep1.1",
+  "set": "math500",
+  "n": 400,
+  "completion": 0.215,
+  "acc": 0.2,
+  "acc_lenient": 0.315,
+  "acc_on_completed": 0.9186046511627907,
+  "loop_end": 0.44,
+  "no_box": 0.01,
+  "mean_tokens": 14277.5425
+ },
+ {
+  "tag": "base_rep1.2",
+  "set": "gsm8k",
+  "n": 400,
+  "completion": 0.31,
+  "acc": 0.01,
+  "acc_lenient": 0.0225,
+  "acc_on_completed": 0.03225806451612903,
+  "loop_end": 0.38,
+  "no_box": 0.22,
+  "mean_tokens": 12935.4175
+ },
+ {
+  "tag": "base_rep1.2",
+  "set": "math500",
+  "n": 400,
+  "completion": 0.2425,
+  "acc": 0.0125,
+  "acc_lenient": 0.0325,
+  "acc_on_completed": 0.05154639175257732,
+  "loop_end": 0.39,
+  "no_box": 0.1425,
+  "mean_tokens": 13708.33
  },
  {
   "tag": "p50c",
