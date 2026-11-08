@@ -9,3 +9,4 @@ results/01_behaviour/gen_eval/*.jsonl
 !results/01_behaviour/gen_eval/summary.jsonl
 results/02_loops/t38_data/
 runpod_sync/
+__pycache__/
