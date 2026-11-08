@@ -12,7 +12,7 @@
 cd /scratch/yang0531/blf_sidefx
 export PY=/scratch/yang0531/resft/env/bin/python PYTHONPATH=/scratch/yang0531/blf_models/pylib:/scratch/yang0531/blf_models/pylib_sidefx MATHVERIFY_PKGS=/scratch/yang0531/blf_models/pylib_sidefx
 export HF_HOME=/scratch/yang0531/noise_pilot/hf_cache VLLM_USE_FLASHINFER_SAMPLER=0 TOKENIZERS_PARALLELISM=false OMP_NUM_THREADS=4
-B=/scratch/yang0531/blf_models/base; P=/scratch/yang0531/blf_models/p50c; S=notes/sidefx/specs; O=/scratch/yang0531/blf_data/sidefx
+B=/scratch/yang0531/blf_models/base; P=/scratch/yang0531/blf_models/p50c; S=results/02_loops/overshoot/sidefx/specs; O=/scratch/yang0531/blf_data/sidefx
 mkdir -p $O/screen/logs $O/screen/q; nvidia-smi --query-gpu=name --format=csv,noheader; date
 SLOTS=$1; MEM=$2; shift 2
 Q=$O/screen/q/queue_$SLURM_JOB_ID; printf "%s\n" "$@" > $Q; cat $Q

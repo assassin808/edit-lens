@@ -1,4 +1,4 @@
-"""Figures for test 5 from notes/test5_paths_<TAG>.json.   python scripts/test5_figs.py TAG"""
+"""Figures for test 5 from results/02_loops/paths/test5_paths_<TAG>.json.   python scripts/test5_figs.py TAG"""
 import json, sys, os
 import numpy as np
 import matplotlib; matplotlib.use("Agg")
@@ -7,8 +7,8 @@ from matplotlib.colors import LinearSegmentedColormap
 
 TAG = sys.argv[1]
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-S = json.load(open(f"{REPO}/notes/test5_paths_{TAG}.json")); C = S["comp"]
-os.makedirs(f"{REPO}/notes/fig", exist_ok=True)
+S = json.load(open(f"{REPO}/results/02_loops/paths/test5_paths_{TAG}.json")); C = S["comp"]
+os.makedirs(f"{REPO}/results/02_loops/paths/fig", exist_ok=True)
 BLUE, ORANGE, GRAY, INK, MUTED = "#2a78d6", "#eb6834", "#a3a29d", "#0b0b0b", "#52514e"
 plt.rcParams.update({"font.size": 9, "axes.edgecolor": GRAY, "axes.labelcolor": INK, "xtick.color": MUTED, "ytick.color": MUTED,
                      "axes.spines.top": False, "axes.spines.right": False})
@@ -28,7 +28,7 @@ ax.set_yticks(y); ax.set_yticklabels(names); ax.axvline(0, color=GRAY, lw=0.8); 
 ax.set_xlabel("% of the edit's loop-NLL effect"); ax.grid(axis="x", color="#e6e5e0", lw=0.6); ax.set_axisbelow(True)
 ax.set_title("Which components carry the p50c edit to the loop logits\n" + sub, fontsize=9, loc="left", color=INK)
 ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.4, -0.06), ncol=2)
-fig.tight_layout(); fig.savefig(f"{REPO}/notes/fig/test5_mediators_{TAG}.png", dpi=160); plt.close(fig)
+fig.tight_layout(); fig.savefig(f"{REPO}/results/02_loops/paths/fig/test5_mediators_{TAG}.png", dpi=160); plt.close(fig)
 
 # 2. per-head block fraction heatmap (L16-23)
 M = np.full((8, 16), np.nan)
@@ -46,7 +46,7 @@ ax.set_yticks(range(8)); ax.set_yticklabels([f"L{L}{' (full)' if L in (19, 23) e
 ax.set_xticks(range(16)); ax.set_xlabel("head (linear-attn layers: 16 heads × 128; full-attn: 8 × 256)")
 fig.colorbar(im, ax=ax, label="block, % of total effect")
 ax.set_title("Per-head mediation (block X ← base in the p50c run)\n" + sub, fontsize=9, loc="left", color=INK)
-fig.tight_layout(); fig.savefig(f"{REPO}/notes/fig/test5_heads_{TAG}.png", dpi=160); plt.close(fig)
+fig.tight_layout(); fig.savefig(f"{REPO}/results/02_loops/paths/fig/test5_heads_{TAG}.png", dpi=160); plt.close(fig)
 
 # 3. AtP vs exact inject
 sn = [n for n in C if "atp_mean" in C[n]]
@@ -60,5 +60,5 @@ for n in sorted(sn, key=lambda n: -abs(C[n]["inject"]))[:6]:
 r = S["atp_vs_inject_spearman"]
 ax.set_xlabel("exact inject effect (Δ loop NLL)"); ax.set_ylabel("AtP estimate")
 ax.set_title(f"AtP vs exact patching, Spearman ρ base {r['base']:.2f} / p50c {r['edit']:.2f}", fontsize=9, loc="left", color=INK)
-ax.legend(frameon=False, fontsize=8); fig.tight_layout(); fig.savefig(f"{REPO}/notes/fig/test5_atp_{TAG}.png", dpi=160); plt.close(fig)
+ax.legend(frameon=False, fontsize=8); fig.tight_layout(); fig.savefig(f"{REPO}/results/02_loops/paths/fig/test5_atp_{TAG}.png", dpi=160); plt.close(fig)
 print("figs written for", TAG)

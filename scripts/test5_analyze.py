@@ -5,7 +5,7 @@ import json, sys, os
 import numpy as np, torch
 MAIN, MPT, RPT, OUT = sys.argv[1:5]
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-S = json.load(open(f"{REPO}/notes/test5_paths_{MAIN}.json")); C = S["comp"]; t = S["total"]
+S = json.load(open(f"{REPO}/results/02_loops/paths/test5_paths_{MAIN}.json")); C = S["comp"]; t = S["total"]
 RM, RR = torch.load(MPT, weights_only=False), torch.load(RPT, weights_only=False)
 out = []
 P = out.append

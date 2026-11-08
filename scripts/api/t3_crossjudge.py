@@ -1,10 +1,10 @@
-"""Cross-family re-judging of the test-3c auto-interp (see notes/api_judge_crossfamily.md).
+"""Cross-family re-judging of the test-3c auto-interp (see results/02_loops/doubt/api_judge_crossfamily.md).
     python scripts/api/t3_crossjudge.py <explainer> <judge> [kinds] [limit]
 explainer: 'sonnet' = reuse the stored claude-sonnet-5-5 descriptions; otherwise an API model name that writes new descriptions
            (cached) with the test-3 explain prompt.
 judge    : API model name. kinds: comma list from desc,desc_shuf,desc_seg,desc_loop (default all). limit: first N neurons (pilot).
 Windows, window order, shuffled-description permutation and prompts are identical to scripts/test3_explain.py.
-out: notes/api_t3_{explainer}__{judge}[_lim{N}].json  (never overwritten: refuses if exists)
+out: results/02_loops/doubt/api_t3_{explainer}__{judge}[_lim{N}].json  (never overwritten: refuses if exists)
 """
 import os, sys, json, random, re, concurrent.futures as cf
 import numpy as np
@@ -15,7 +15,7 @@ EXPL, JUDGE = sys.argv[1], sys.argv[2]
 KINDS = (sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != "all" else "desc,desc_shuf,desc_seg,desc_loop").split(",")
 LIMIT = int(sys.argv[4]) if len(sys.argv) > 4 else None
 PR = json.load(open("/scratch/yang0531/blf_data/t38/t3_explain_prep_32768.json")); N = PR["neurons"]
-SON = json.load(open(f"{REPO}/notes/test3_autointerp_32768_claude-sonnet-5-5_killarney.json"))
+SON = json.load(open(f"{REPO}/results/02_loops/neurons/test3_autointerp_32768_claude-sonnet-5-5_killarney.json"))
 SD = {(x["layer"], x["unit"]): x for x in SON["neurons"]}
 # ---- verbatim from scripts/test3_explain.py ----
 SRCNAME = {"gsm8k": "GSM8K math reasoning", "math": "competition-math reasoning", "ifeval": "instruction-following task",
@@ -91,7 +91,7 @@ S = {g: summ([x for x in out if f(x)]) for g, f in [("astra_L15", lambda x: not 
 nsc = sum(len(ws) for _, ws in items)
 print(json.dumps(S, indent=1)); print(f"missing scores {missing}/{nsc}; empty raw {sum(not o for o in raw)}; api {apicache.STATS}")
 tag = f"{'sonnet' if EXPL == 'sonnet' else EXPL}__{JUDGE}" + (f"_lim{LIMIT}" if LIMIT else "") + ("" if len(KINDS) == 4 else "_" + "-".join(KINDS))
-fn = f"{REPO}/notes/api_t3_{tag}.json"
+fn = f"{REPO}/results/02_loops/doubt/api_t3_{tag}.json"
 assert not os.path.exists(fn), f"{fn} exists; not overwriting"
 json.dump(dict(explainer=EXPL, judge=JUDGE, kinds=KINDS, n_scores=nsc, missing_scores=missing, empty_raw=sum(not o for o in raw),
                summary=S, neurons=out), open(fn, "w"), indent=1)

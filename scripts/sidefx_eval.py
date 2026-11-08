@@ -13,7 +13,7 @@ Edit spec (JSON): {"layers": {"15": {"cols": [...], "alpha": float | [per-col fl
   (positions whose base projection is already below F are left as they are; the edit never pushes anything up).
 
     python scripts/sidefx_eval.py <model_dir> <tag> [--spec spec.json] [--sets gsm8k,math500] [--n 20] [--offset 0]
-        [--samples 1] [--max-tokens 16384] [--cudagraph none|full_decode_only] [--outdir notes/sidefx]
+        [--samples 1] [--max-tokens 16384] [--cudagraph none|full_decode_only] [--outdir results/02_loops/overshoot/sidefx]
 Writes <outdir>/<tag>.jsonl (refuses to overwrite) and appends a summary line to <outdir>/summary.jsonl.
 """
 import os, sys, json, time, argparse, re
@@ -108,7 +108,7 @@ def main():
     ap.add_argument("--n", type=int, default=20); ap.add_argument("--offset", type=int, default=0); ap.add_argument("--samples", type=int, default=1)
     ap.add_argument("--max-tokens", type=int, default=16384); ap.add_argument("--mem", type=float, default=0.85)
     ap.add_argument("--max-seqs", type=int, default=256); ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--save-ids", action="store_true"); ap.add_argument("--cudagraph", default="none"); ap.add_argument("--outdir", default=f"{REPO}/notes/sidefx")
+    ap.add_argument("--save-ids", action="store_true"); ap.add_argument("--cudagraph", default="none"); ap.add_argument("--outdir", default=f"{REPO}/results/02_loops/overshoot/sidefx")
     a = ap.parse_args()
     os.makedirs(a.outdir, exist_ok=True)
     outp = f"{a.outdir}/{a.tag}.jsonl"

@@ -96,4 +96,4 @@ print("\n### (c) residual-stream change at loop positions: ‖Δ‖/‖base‖ a
 for L in [15, 16, 19, 20, 23, 24]:
     v = np.mean([((b["resid"][L] - e["resid"][L]).norm(dim=1) / b["resid"][L].norm(dim=1)).mean().item() for b, e in zip(rb, re_)])
     print(f"  after layer {L-1 if L>0 else 'emb'} (hidden_states[{L}]): {v:.3f}")
-torch.save({"base": rb, "edit": re_}, "notes/q3_who_reads_u.pt")
+torch.save({"base": rb, "edit": re_}, "results/02_loops/paths/q3_who_reads_u.pt")

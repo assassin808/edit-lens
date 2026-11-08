@@ -1,4 +1,4 @@
-"""Pre-registered analysis for notes/sidefx_confirm.md (clampp5 vs p50chook, paired by problem).
+"""Pre-registered analysis for results/02_loops/overshoot/sidefx_confirm.md (clampp5 vs p50chook, paired by problem).
     python scripts/sidefx_confirm_analyze.py <out.json> ref=<glob> trt=<glob> [--fresh-from 200]
 Each glob may match several chunk files (merged). Per problem: per-arm mean over its samples. Primary: one-sided sign-flip
 permutation test on sum_i (ws_ref_i - ws_trt_i), 100k flips, seed 0. NI: problem-level bootstrap (10k, seed 0) of trt - ref,

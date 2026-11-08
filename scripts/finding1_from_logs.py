@@ -30,4 +30,4 @@ for ds in SETS:
     # rescue analysis: p50c correct where unedited was wrong — were those unedited cut?
     resc = [i for i in D["p50c"] if D["p50c"][i]["ok"] and i in D["unedited"] and not D["unedited"][i]["ok"]]
     print(f"   p50c rescues {len(resc)}; of which unedited was cut: {sum(not D['unedited'][i]['done'] for i in resc)}; regressions: {sum(1 for i in D['unedited'] if D['unedited'][i]['ok'] and i in D['p50c'] and not D['p50c'][i]['ok'])}")
-json.dump(res, open("notes/finding1_from_logs.json", "w"), indent=1)
+json.dump(res, open("results/01_behaviour/finding1_from_logs.json", "w"), indent=1)

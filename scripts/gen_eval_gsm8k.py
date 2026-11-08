@@ -1,6 +1,6 @@
 """Generation eval with vLLM: one model dir, N GSM8K test problems, Astra's sampling, thinking on.
     python scripts/gen_eval_gsm8k.py <model_dir> <tag> [N=50] [max_tokens=16384]
-Writes notes/gen_eval/<tag>.jsonl and prints acc / closed / cut / mean tokens / rep20."""
+Writes results/01_behaviour/gen_eval/<tag>.jsonl and prints acc / closed / cut / mean tokens / rep20."""
 import os, sys, json, re, time
 os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
 from vllm import LLM, SamplingParams
@@ -28,20 +28,20 @@ def main():
                                        tokenize=False, add_generation_prompt=True, enable_thinking=True) for r in rows]
     sp = SamplingParams(temperature=0.6, top_p=0.95, top_k=20, presence_penalty=1.5, max_tokens=MT, seed=0)
     t = time.time(); outs = llm.generate(prompts, sp); dt = time.time() - t
-    os.makedirs("notes/gen_eval", exist_ok=True)
+    os.makedirs("results/01_behaviour/gen_eval", exist_ok=True)
     recs = []
     for r, o in zip(rows, outs):
         s = o.outputs[0].text; ids = list(o.outputs[0].token_ids); gold = r["answer"].split("####")[-1].strip().replace(",", "")
         pred = extract(s)
         recs.append(dict(id=r["id"], gold=gold, pred=pred, correct=bool(pred is not None and same(pred, gold)), n_tokens=len(ids),
                          closed="</think>" in s, cut=o.outputs[0].finish_reason == "length", rep20=rep_ratio(ids), text=s))
-    with open(f"notes/gen_eval/{tag}.jsonl", "w") as f:
+    with open(f"results/01_behaviour/gen_eval/{tag}.jsonl", "w") as f:
         for x in recs: f.write(json.dumps(x) + "\n")
     n = len(recs)
     summ = dict(tag=tag, n=n, acc=sum(x["correct"] for x in recs) / n, closed=sum(x["closed"] for x in recs) / n, cut=sum(x["cut"] for x in recs) / n,
                 mean_tokens=sum(x["n_tokens"] for x in recs) / n, rep20=sum(x["rep20"] for x in recs) / n, sec=dt, tok_per_s=sum(x["n_tokens"] for x in recs) / dt)
     print("SUMMARY", json.dumps(summ))
-    with open("notes/gen_eval/summary.jsonl", "a") as f: f.write(json.dumps(summ) + "\n")
+    with open("results/01_behaviour/gen_eval/summary.jsonl", "a") as f: f.write(json.dumps(summ) + "\n")
 
 if __name__ == "__main__":
     main()

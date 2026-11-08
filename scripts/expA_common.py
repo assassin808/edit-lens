@@ -107,7 +107,7 @@ def real_recheck(think, cand):
     le = think.find("\n", cand["end"]); le = cand["end"] if le < 0 else le
     return bool(_RECHECK.search(think[le:le + 300]))
 
-# ---------------- token sets (pre-registered in notes/expA_calibrated_doubt.md)
+# ---------------- token sets (pre-registered in results/02_loops/doubt/expA_calibrated_doubt.md)
 DOUBT = {"wait", "but", "hmm", "actually", "however", "maybe", "perhaps", "double", "verify", "check", "hold",
          "alternatively", "re", "is", "did", "no"}
 WRAP = {"so", "therefore", "thus", "final", "</think>", "**", "\\boxed", "answer", "done", "conclusion", "okay", "ok"}

@@ -1,0 +1,198 @@
+# What Astra's p50c edit does inside Qwen3.5-0.8B: results
+
+> **One sentence:** The edit does not make the model reason better. It turns a group of "go back and re-read / re-check" neurons into an **anti-copy switch**: the model gets kicked out of its loops, but its internal state overshoots, causing side effects, and the result is no better than simply turning thinking off.
+
+This file collects tests 2 / 3 / 4 / 5 / 8 and the "edited model with thinking off" screening. Where it conflicts with the earlier `q1`–`q6` notes, **this file is authoritative** (see §4).
+
+---
+
+## 1. The causal chain, from weights to behaviour
+
+```
+128 neurons in L15 / L19        ← fire when the model goes back to re-read the problem / re-check (test 3)
+   │ after the edit they write a large vector along −u
+   ▼
+direction u: "doubt, go back and check" ↔ "wrap up, move on"   ← 5 lenses + SAE agree (tests 2, 4)
+   │ changes the queries of downstream attention
+   ▼
+L19 / L23 attention: induction attention to the earlier copy of the token about to be repeated drops ~1/3   ← path patching (test 5)
+   │ the repeated token becomes the most suppressed token in the vocabulary; MLPs L20–23 partly counteract
+   ▼
+behaviour: repeats still start, but are cut short (longest repeat per text: median 90 tokens vs 27,513 in base)
+cost: the state overshoots along −u, out of normal reasoning (test 8) → no \boxed{}, whitespace degeneration, no help with thinking off
+```
+
+## 2. Question × object × tool × finding
+
+| Question | Object | Tools | Finding | Test / file |
+|---|---|---|---|---|
+| Which neurons were edited? | the 128 edited neurons | rank all neurons by extra u-write inside loops; top-activating windows; auto-interp (Sonnet explainer + judge, Opus spot check on 24) | Astra picked mostly the right ones: overlap with the true top-64 is 44 (L15) / 36 (L19), chance 1. About half of L15 fire on re-reading the problem / restating / self-checking; only 21% / 5% of top windows are inside verbatim loops. | test 3: `test3_neurons.md` |
+| What do they write? | direction u | logit lens, tuned lens, Neuronpedia J-lens / J++, activation steering (add ±u, run the rest of the network, read the next-token change; Turner et al. 2023 — not Nanda's R-lens) | +u promotes Wait / maybe / Actually / 还是 / 不是; −u promotes `\n\n` / So / Final / `</think>`. The edit's final logit change correlates **0.98** with injecting −u at L15. | test 2: `test2_lenses.md` |
+| What is it at the feature level? | residual-stream features | own SAEs after L15 and L19 (16k each) + public layer-17 SAE, Sonnet labels | Latents switched off: restating, self-doubt. Latents switched on: half "final answer", half off-distribution (FVU 0.13 → 0.5). | test 4: `test4_sae.md` |
+| Which path carries the effect? | attention heads, MLPs | path patching (block / inject), AtP, induction-attention measurement; 20 texts (H100) + 30-text replication incl. 10 held out | 91% goes through L16–23 attention (96% held out); the edit sites' direct path is 3%; MLPs L20–23 counteract (blocking them makes the effect 55% larger). Mechanism: **copy suppression** on the query side, not a stop signal. | test 5: `test5_paths.md` |
+| Where do the states go? | residual states | probe, difference-of-means direction, PCA, the edited model's own generations | Edited loop states overshoot past normal states along −u (cos −0.94) and form their own cluster. Thinking-off loops use the same u axis. | test 8: `test8_probe.md` |
+| Does the edit help with thinking off? | generation | xuanqi's `screen_eval.py`, identical settings, same H100 | No: GSM8K 0.522 vs 0.560 base, MATH-500 0.487 vs 0.510 (paired −0.04 / −0.02, not significant). | `screen/nothink_p50c_runpod.md` |
+
+## 3. Behaviour (200 problems per set × 2 samples, 16k cap)
+
+| Config | GSM8K acc | MATH-500 acc | mean tokens (GSM8K / MATH) |
+|---|---|---|---|
+| base, thinking on | 0.147 | 0.072 | 14983 / 15630 |
+| **p50c, thinking on** | 0.570 | 0.312 | 9964 / 13759 |
+| **base, thinking off** | 0.555–0.560 | 0.510–0.512 | ~1500 / ~5500 |
+| p50c, thinking off | 0.522 | 0.487 | 1468 / 5701 |
+| base, thinking budget 4k / 8k (forced `</think>`) | 0.517 / 0.537 | 0.315 / 0.343 | — |
+
+**Accuracy = completion rate × accuracy on completed.** Base with thinking on completes only 12%, but gets 94% of those right. The edit raises completion a lot, while accuracy on completed problems drops to about 0.75. **This drop is a selection effect, not damage:** on the same problems, paired accuracy is unchanged in every arm (±0.02; see §6). The edit now finishes harder problems that base never finished. New failure modes on MATH-500 (xuanqi): finishes without `\boxed{}` 21%, whitespace degeneration 5%, long but neither looping nor finishing 12%.
+
+## 4. Corrections to the earlier notes (this section is authoritative)
+
+- **`q3_who_reads_it.md` says "copy attention unchanged; not a copy-head story". That is wrong.**
+  - Q3 measured the duplicate-token offset: attention from the current token to its own earlier occurrence. That really is unchanged; L23 h6 is such a head.
+  - Copying uses the induction offset: attention to the earlier copy of the *next* token. There L23 attention drops 34%, and this is the edit's main path. See `test5_paths.md`.
+- **`q1_what_changed.md` treats the low indices of the edited neurons as a feature of Astra's choice. That is wrong.** 92% of the *true* top-64 are also below index 1792, concentrated in 0–447. This is how the model is organised, not a sign that Astra searched only half. See `test3_neurons.md`.
+- **"Only 10% along u at the end" does not mean u is unimportant.** That is a geometric decomposition; causally, the edit correlates 0.98 with injecting −u. See `test2_lenses.md`.
+
+## 5. Lessons for the tools
+
+- **Use difference-of-means, not probe weights, to find a direction.** A logistic-regression probe has cosine only 0.05–0.16 with u, yet resid·u alone separates loop vs normal at AUC 0.98. The probe weight is whitened and understates the relation.
+- **AtP is only good for screening.** Its rank correlation with exact patching is 0.62–0.67, and it is off by 3–4× on the L15 MLP. Confirm with exact patching.
+- **Measure the right attention offset.** The wrong one gives the opposite conclusion (§4).
+
+## 6. Side effects: is the overshoot the cause? (branch `yang/sidefx`, `results/02_loops/overshoot/sidefx.md`)
+
+All arms run on one harness: thinking on, 16k cap, 200 GSM8K + 200 MATH-500, k=0. Variants are hooks on base weights; `p50chook` is the hook version of p50c and serves as the control.
+
+| arm | completion × acc-on-completed = acc | loop_end | whitespace |
+|---|---|---|---|
+| base | 0.095 × 0.947 = 0.100 | 0.890 | 0 |
+| p50c (real weights) | 0.578 × 0.835 = 0.482 | 0.052 | 4.0% |
+| p50chook (control) | 0.560 × 0.817 = 0.460 | 0.077 | 3.3% |
+| clamp at normal 5th pct (cut deepest overshoot) | 0.532 × 0.845 = 0.453 | 0.075 | 1.5% |
+| loop-selective neurons only (matched loop push) | 0.422 × 0.852 = 0.375 | 0.393 | 0.8% |
+| clamp at normal mean | 0.410 × 0.921 = 0.385 | 0.285 | 0 |
+| α = 3 | 0.415 × 0.910 = 0.385 | 0.345 | 0.8% |
+
+- **The side effects and the loop fix are mostly the same knob.** Every weaker push that removes whitespace degeneration also stops fixing loops (loop_end 0.29–0.39).
+- **Only the deepest tail of the overshoot is removable.** Clamping it keeps the fix and halves whitespace (weak evidence, p = 0.045 pooled; confirmed at scale in §6a).
+- **Neurons that fire on normal re-reading are part of the fix.** Editing only the loop-selective neurons, with the same push at loop positions, does not fix loops.
+  - Hypothesis: these neurons fire at loop onset, before verbatim repetition starts.
+- **No `\boxed{}` shows up as a different failure at 16k.** It is ~1% per arm (it was 21% at 32k). Instead, 8% of p50c samples write `</think>` and then keep re-checking the problem wording until the cap, and this rate does not depend on the overshoot.
+- **Compute:** ~4.5 L40S-h. One deviation: hook vs real-weight equivalence missed its gate (0.111 vs 0.1, bf16 noise), so the p50chook control was added.
+
+### 6a. Confirmation of the tail clamp (branch `yang/sidefx-confirm`, `results/02_loops/overshoot/sidefx_confirm.md`)
+
+Pre-registered rerun of `clampp5` vs `p50chook` on all 500 MATH-500 + 500 GSM8K problems, 2 samples each, new seed, 16k cap.
+
+| arm | completion × acc-on-completed = acc | loop_end | whitespace |
+|---|---|---|---|
+| p50chook (control) | 0.547 × 0.827 = 0.453 | 0.060 | 89 / 2,000 |
+| clamp at normal 5th pct | 0.532 × 0.849 = 0.453 | 0.069 | 49 / 2,000 |
+
+- **Primary confirmed.** Whitespace runaways fall by 45% (ratio 0.55, difference −2.0 pt [−3.1, −1.0], one-sided p = 0.0002); same direction on each set and on the 600 problems not in the screen.
+- **No cost on the registered margins.** Loop endings +0.9 pt (bound +2.1 ≤ +3); accuracy 0.0 pt (bound −1.5 ≥ −3).
+- **So** the deepest tail of the overshoot can be trimmed: it carries part of the damage and none of the fix. Hook only, one seed, 16k only.
+- **Compute:** 6.0 L40S-h.
+
+
+## 6c. LLM-API checks (branch `yang/api`, `results/02_loops/doubt/api_judge_crossfamily.md`, `results/02_loops/doubt/api_failure_labels.md`)
+
+Only Claude and open-weight models were reachable on the gateway. The non-Anthropic judge is gpt-oss-120b. 2,959 API calls in total.
+
+- **Auto-interp holds up with a different judge.** With gpt-oss as judge, absolute AP drops by about 0.1 (it is a weaker judge). But the gap between real and shuffled descriptions is unchanged (+0.20 to +0.27), and random neurons remain as describable as Astra's. Neither judge prefers its own descriptions.
+- **What the edited model's failures are** (Sonnet labels; hand-check 17/20, κ = 0.70 against gpt-oss):
+
+| set | over-doubt wording | re-check correct answer | paraphrase cycling | verbatim loop | plain error |
+|---|---|---|---|---|---|
+| p50c, thinking on (failures) | 42% | 27% | 10% | 13% | 5% |
+| base, thinking off (failures) | 20% | 2% | 2% | 6% | 69% |
+
+  **The edit removes the copying, not the doubting.** p50c's failures are still doubt: re-interpreting the question, or re-checking an answer that is already right. It is just no longer verbatim. Paraphrase cycling is present in 90% of capped non-looping outputs, but Exp B (§6e) finds it just as common in correct generations, so it is not specific to failure. Thinking-off failures are ordinary reasoning errors.
+- **Doubt vs correctness (label view).** With thinking off, base doubts its first answer 15% of the time when it is right and 52% when it is wrong, so doubt is tied to correctness. With thinking on, doubt happens 95–100% of the time whatever the first answer. So the 0.8B model *can* calibrate doubt; thinking mode makes it doubt always. (Exp A gives the logprob view.)
+
+
+## 6d. Exp A: is the doubt calibrated? (branch `yang/expA`, `results/02_loops/doubt/expA_calibrated_doubt.md`)
+
+We measured P(next token starts a doubt / re-check) right after the model's first stated answer, together with resid·u at hs16, on fresh thinking-on traces (500 GSM8K + 500 MATH-500). The predictions were pre-registered; 3 of 4 failed. The kill rule was not triggered. GPU: about 3.0 h.
+
+| arm | n correct / wrong | AUC of P(doubt) for wrong vs right | AUC of resid·u | median P(doubt) after correct / wrong |
+|---|---|---|---|---|
+| base 0.8B, thinking on | 246 / 45 | 0.65 [0.55, 0.74] (0.56 after controls) | **0.80** (0.72 after controls) | 0.47 / 0.60 |
+| p50c on the same prefixes | 246 / 45 | 0.66 | 0.60 | 0.44 / 0.58 |
+| Qwen3.5-4B, own traces | 631 / 20 | 0.52 [0.39, 0.66] | — | 0.15 / 0.16 |
+| 0.8B, thinking-off text, no-think template | 210 / 161 | 0.72 | — | 0.005 / 0.023 |
+| same text inside `<think>` | 210 / 161 | 0.59 | — | 0.38 / 0.42 |
+
+- **The model knows when it is wrong, but its decision to doubt barely uses this.** resid·u separates wrong from right first answers (AUC 0.80), but correlates only weakly with the next-token doubt (Spearman 0.42).
+- **Thinking mode makes it doubt almost always.** The same text gets about 70× more doubt after a correct answer inside `<think>` than outside it. This agrees with the API labels in §6c.
+- **The edit pushes hardest where doubt was warranted.** Its push along −u is larger at wrong answers (−0.37 vs −0.13), which erases u's correctness signal (AUC 0.80 → 0.60). Doubt probability itself changes little at answer points (×0.92–0.94).
+- **The 4B is not better calibrated; it doubts less** (median 0.15 vs 0.47 after correct answers). It has only 20 wrong answers, so its CI is wide.
+- **Caveats:**
+  - Two detector/grader amendments were made after some AUCs had been seen; they apply to all arms, and the pre-fix numbers are kept.
+  - Wrong answers come later in the trace. The result survives a linear control, but a nonlinear confound is not ruled out.
+  - Astra's own logs show a weaker u signal (0.64, only 11 wrong answers).
+
+
+## 6e. Exp B: are the long unfinished outputs paraphrase loops? (branch `yang/expB`, `results/02_loops/doubt/expB_paraphrase_loops.md`)
+
+**Prediction failed; kill rule triggered.** The 12% "cut at the cap, still reasoning" class (24 texts, all MATH-500, Astra's 32k logs) does not paraphrase-repeat more than p50c's *correct* generations.
+
+| group | embedding PR rate (τ 0.70) | lexical PR rate (Jaccard ≥ 0.5) |
+|---|---|---|
+| p50c, still reasoning (target) | 0.84 | 0.24 |
+| p50c, correct | 0.85 | 0.08 |
+| p50c, finished wrong / no `\boxed{}` | 0.92 / 0.86 | 0.24 / 0.30 |
+| base thinking-on, before its verbatim loop | 0.90 | 0.12 |
+| base thinking-off | 0.69 | 0.03 |
+
+- **P2 failed.** Target vs correct: ratio 0.98, CI of the difference [−0.07, +0.03]. **P3 failed:** 0.96× base pre-loop.
+- **The embedding detector saturates**, at 84–92% in every thinking-on class. The lexical detector separates the classes, but mostly by position. Matched by position (5k–10k words, exploratory), the rates are 0.28 for the target vs 0.21 for correct, while finished-wrong (0.40) and no-`\boxed{}` (0.43) are higher.
+- **Hypothesis (untested):** re-checking in other words is normal late in this model's long thinking, before and after the edit. Base then locks into a verbatim loop; p50c only blocks that step. A test: continue base and p50c from the same prefixes and compare at matched positions.
+- **Correction to §6c:** the API labels found paraphrase cycling in ~90% of capped non-looping outputs, but had no control. It is just as common in successful generations, so it is not specific to failure. The content claim (doubt, re-checking) stands.
+- **Compute:** ~0.1 L40S-h (CPU work).
+
+
+## 6f. Does the edit solve problems the unedited model cannot? (per-problem overlap, no new runs)
+
+We take the 400 screening problems and list the ones p50c solves with thinking on (16k cap, k = 0). Then we ask how often unedited thinking-off solves them (2 samples).
+- GSM8K: unedited thinking-off solves 0.74 of them (0.56 overall). Only 12% are problems it fails in both samples.
+- MATH-500: 0.80 (0.51 overall); 8% failed in both.
+- **Reference for sampling noise.** For problems solved by p50c with thinking off, which behaves like base, the same "failed in both" share is 8% (GSM8K) and 10% (MATH-500).
+- **Conclusion.** Problems that only the edited thinking-on model solves occur no more often than sampling noise. The edit rescues problems the model could already solve, which supports "no new reasoning" at the problem level. The reverse does not hold: on MATH-500 problems that base thinking-off solves in both samples, p50c thinking-on gets only 0.54.
+
+
+## 6g. Where do loops start? (branch `yang/onset`, `results/02_loops/doubt/loop_onset.md`)
+
+**The "doubt after success" hypothesis failed; the kill rule fired.** Most loops start before the model has stated any answer, which fits the impasse account (Duan et al. 2026). Data: 941 looping base traces (Exp A fresh traces, 12k cap), replicated on Astra's logs (378) and MATH Level 5 (395). GPU: 0.07 h.
+
+| source | after a correct answer | after a wrong answer | no answer yet |
+|---|---|---|---|
+| fresh GSM8K | 75 | 6 | 389 |
+| fresh MATH-500 | 25 | 2 | 444 |
+| Astra logs (both) | 33 | 3 | 342 |
+| MATH Level 5 | 3 | 4 | 388 |
+
+- **No answer yet:** 89% of onsets (Astra 90%, Level 5 98%). P2 fails.
+- **After-correct onsets are not over-represented.** Onsets follow a correct answer *less* often than loop-free positions at the same depth (0.11 vs 0.17). P4 fails with the opposite sign.
+- **When an answer was stated before onset, it is usually correct** (93%), but this covers only 108 of 941 onsets.
+- **Caveat on detection.** The model often computes the right value without stating it ("Total = 3 + 4 + 0 = 7. Wait, did I miss something? Let's re-read the prompt"). Counting any computed value, the correct value appears before 48% of onsets. No base rate was computed, so this is only an upper bound.
+- **What the loops look like** (54 read by eye). On GSM8K, onsets with no answer yet are re-interpretation spirals ("Let's re-read the prompt", "Is it possible that…"). On MATH they are real impasses: the model redoes the same computation.
+- **Hidden state.** Correct answers that are followed by a loop sit further to the "doubt" side of u than correct answers in finishing traces (AUC 0.71). The reason is untested. P3 could not be tested (too few wrong answers in finishing traces).
+- **Consequence for the story.** "The model knows it is right, doubts, and then copies" is *not* how most loops start in this model. Exp A's finding (it can tell right from wrong, but doubt barely uses that) stands. The loops themselves mostly begin while the model is still re-reading or stuck.
+
+## 6b. Untested hypotheses
+
+- Why do the late MLPs counteract the edit?
+
+## 7. Compute and reproduction
+
+- **GPU:** about 16.7 L40S/H100-h on Killarney (incl. Exp A 3.0, clamp confirmation 6.0) + 0.75 H100-h (RunPod).
+- **Pre-registered predictions:** each test file lists them with pass / fail. Failures are reported as they are; predictions were not edited afterwards.
+- **Reproduce on other clusters:** `alliance/setup.sh` + `alliance/job.sh <branch> scripts/portable_*.sh`.
+- **Large outputs:** per-sample outputs are not in git; they are on Killarney in `/scratch/yang0531/blf_data/`.
+- **Figures** (each in the `fig/` folder of its section under `results/02_loops/`):
+  - `test2_*`: u variance share and axis
+  - `test4_*`: SAE features
+  - `test5_mediators_full_runpod.png`: path patching
+  - `test8_state_pca_killarney.png`: state overshoot
+  - `test8_onset_locked_killarney.png`: around loop onset

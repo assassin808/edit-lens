@@ -32,7 +32,7 @@ def main():
     for name in a.sets.split(","):
         if name == "gsm8k": rows += [dict(set="gsm8k", id=r["id"], problem=r["question"], answer=r["answer"].split("####")[-1].strip().replace(",", "")) for r in map(json.loads, open("data/gsm8k_test.jsonl"))][:a.n]
         else: rows += [dict(set="math500", **{k: r[k] for k in ("id", "problem", "answer")}) for r in map(json.loads, open("data/math500.jsonl"))][:a.n]
-    os.makedirs("notes/steer", exist_ok=True)
+    os.makedirs("results/02_loops/steering/steer", exist_ok=True)
     for c in [float(x) for x in a.cs.split(",")]:
         state["c"] = c; tag = f"{a.model}_steer{c:g}"; recs = []; t0 = time.time(); ntok = 0
         for i in range(0, len(rows), a.batch):
@@ -49,13 +49,13 @@ def main():
                 recs.append(dict(set=r["set"], id=r["id"], gold=r["answer"], pred=pred, correct=ok, n_tokens=len(g), cut=len(g) >= a.max_tokens, closed="</think>" in text,
                                  loop_end=bool(ls["verbatim_loop_end"] or ls["repetitive_end"]), text=text))
             print(f"  {tag}: {i+len(B)}/{len(rows)} {time.time()-t0:.0f}s", flush=True)
-        with open(f"notes/steer/{tag}.jsonl", "w") as f:
+        with open(f"results/02_loops/steering/steer/{tag}.jsonl", "w") as f:
             for x in recs: f.write(json.dumps(x) + "\n")
         done = [x for x in recs if not x["cut"]]
         summ = dict(tag=tag, c=c, n=len(recs), completion=len(done)/len(recs), acc_all=sum(x["correct"] for x in recs)/len(recs), acc_on_completed=sum(x["correct"] for x in done)/max(1,len(done)),
                     loop_end=sum(x["loop_end"] for x in recs)/len(recs), mean_tokens=ntok/len(recs), sec=round(time.time()-t0), tok_per_s=round(ntok/(time.time()-t0)))
         print("SUMMARY", json.dumps(summ), flush=True)
-        with open("notes/steer/summary.jsonl", "a") as f: f.write(json.dumps(summ) + "\n")
+        with open("results/02_loops/steering/steer/summary.jsonl", "a") as f: f.write(json.dumps(summ) + "\n")
 
 if __name__ == "__main__":
     main()

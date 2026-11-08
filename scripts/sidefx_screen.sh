@@ -12,7 +12,7 @@ cd /scratch/yang0531/blf_sidefx
 arm=$1; N=${2:-200}; K=${3:-2}
 export PY=/scratch/yang0531/resft/env/bin/python PYTHONPATH=/scratch/yang0531/blf_models/pylib:/scratch/yang0531/blf_models/pylib_sidefx MATHVERIFY_PKGS=/scratch/yang0531/blf_models/pylib_sidefx
 export HF_HOME=/scratch/yang0531/noise_pilot/hf_cache VLLM_USE_FLASHINFER_SAMPLER=0 TOKENIZERS_PARALLELISM=false
-B=/scratch/yang0531/blf_models/base; P=/scratch/yang0531/blf_models/p50c; S=notes/sidefx/specs; O=/scratch/yang0531/blf_data/sidefx
+B=/scratch/yang0531/blf_models/base; P=/scratch/yang0531/blf_models/p50c; S=results/02_loops/overshoot/sidefx/specs; O=/scratch/yang0531/blf_data/sidefx
 case $arm in base) M=$B; SP="";; p50c) M=$P; SP="";; *) M=$B; SP="--spec $S/$arm.json";; esac
 nvidia-smi --query-gpu=name --format=csv,noheader; date
 $PY scripts/sidefx_eval.py $M screen_${arm}_n${N}x${K} $SP --n $N --samples $K --mem 0.85 --max-seqs 256 --outdir $O/screen 2>&1 | grep -vE "it/s|s/it"

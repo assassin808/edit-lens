@@ -1,7 +1,7 @@
 """Screening-set generation eval with Astra's protocol (prompt, sampling think35, grader, loop rule), vLLM, low GPU share.
     python scripts/screen_eval.py <model_dir> <tag> [--sets gsm8k,math500] [--n 100] [--samples 1] [--max-tokens 16384]
         [--no-think] [--rep-penalty 1.1] [--think-budget 4096] [--mem 0.07]
-Writes notes/screen/<tag>.jsonl (+ summary line in notes/screen/summary.jsonl)."""
+Writes results/01_behaviour/screen/<tag>.jsonl (+ summary line in results/01_behaviour/screen/summary.jsonl)."""
 import os, sys, json, time, argparse
 os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/scripts")
@@ -30,7 +30,7 @@ def main():
     sets = load_sets(a.sets.split(","), a.n)
     sp_kw = dict(SAMPLING_THINK35); sp_kw["max_tokens"] = a.max_tokens; sp_kw["seed"] = a.seed
     if a.rep_penalty != 1.0: sp_kw["repetition_penalty"] = a.rep_penalty
-    os.makedirs("notes/screen", exist_ok=True); allrecs = []; t0 = time.time(); ntok = 0
+    os.makedirs("results/01_behaviour/screen", exist_ok=True); allrecs = []; t0 = time.time(); ntok = 0
     for name, rows in sets.items():
         prompts = [tok.apply_chat_template([{"role": "user", "content": build_prompt(r["problem"])}], tokenize=False, add_generation_prompt=True, enable_thinking=not a.no_think) for r in rows]
         if a.think_budget:
@@ -58,7 +58,7 @@ def main():
                 allrecs.append(dict(set=name, id=r["id"], k=k, gold=r["answer"], pred=pred, correct=ok, correct_lenient=okl, n_tokens=n, cut=cut,
                                     closed=("</think>" in text) or a.no_think, loop_end=bool(ls["verbatim_loop_end"] or ls["repetitive_end"]), text=text))
     dt = time.time() - t0
-    with open(f"notes/screen/{a.tag}.jsonl", "w") as f:
+    with open(f"results/01_behaviour/screen/{a.tag}.jsonl", "w") as f:
         for x in allrecs: f.write(json.dumps(x) + "\n")
     summ = dict(tag=a.tag, args=vars(a), sec=round(dt), tok_per_s=round(ntok / dt))
     for name in sets:
@@ -66,7 +66,7 @@ def main():
         summ[name] = dict(n=len(R), completion=len(done)/len(R), acc_all=sum(x["correct"] for x in R)/len(R), acc_on_completed=sum(x["correct"] for x in done)/max(1,len(done)), acc_lenient=sum(x["correct_lenient"] for x in R)/len(R), no_box_finished=sum(1 for x in done if x["pred"] is None)/len(R),
                           loop_end=sum(x["loop_end"] for x in R)/len(R), mean_tokens=sum(x["n_tokens"] for x in R)/len(R))
     print("SUMMARY", json.dumps(summ))
-    with open("notes/screen/summary.jsonl", "a") as f: f.write(json.dumps(summ) + "\n")
+    with open("results/01_behaviour/screen/summary.jsonl", "a") as f: f.write(json.dumps(summ) + "\n")
 
 if __name__ == "__main__":
     main()

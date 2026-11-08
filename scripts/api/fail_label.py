@@ -1,6 +1,6 @@
-"""LLM failure-type labels for p50c / base outputs (see notes/api_failure_labels.md for sampling, text scheme and rubric).
-    python scripts/api/fail_label.py sample                 -> notes/api_fail_sample.json (fixed sample; refuses to overwrite)
-    python scripts/api/fail_label.py label <model> [subset] -> notes/api_fail_labels_<model>[_<subset>].json
+"""LLM failure-type labels for p50c / base outputs (see results/02_loops/doubt/api_failure_labels.md for sampling, text scheme and rubric).
+    python scripts/api/fail_label.py sample                 -> results/02_loops/doubt/api_fail_sample.json (fixed sample; refuses to overwrite)
+    python scripts/api/fail_label.py label <model> [subset] -> results/02_loops/doubt/api_fail_labels_<model>[_<subset>].json
 subset: 'pilot' (10 p50c + 10 base thinking-off), 'kappa50' (fixed 50 stratified items), or 'all'.
 """
 import os, sys, json, random, re, collections, concurrent.futures as cf
@@ -14,7 +14,7 @@ SETS = {  # name: (file, thinking, rule)
     "base_think": (f"{D}/sidefx/screen/screen_base_n100x1.jsonl", "on", "60"),
     **{f"{a}_think": (f"{D}/sidefx/screen/screen_{a}_n200x{2 if a in ('p50chook', 'loopsel') else 1}.jsonl", "on", "60")
        for a in ["p50chook", "clampp5", "loopsel", "clampmean", "a3"]}}
-SAMPLE_F = f"{REPO}/notes/api_fail_sample.json"
+SAMPLE_F = f"{REPO}/results/02_loops/doubt/api_fail_sample.json"
 CODES = ["correct", "reasoning_error", "over_doubt_wording", "endless_recheck", "paraphrase_cycling", "verbatim_loop", "degenerate",
          "truncated_progress", "other"]
 
@@ -152,7 +152,7 @@ def run_label(model, which):
     for it, o in zip(items, outs):
         j = parse(o); res.append(dict(it, label=j, raw=None if j else o))
     nbad = sum(r["label"] is None for r in res)
-    fn = f"{REPO}/notes/api_fail_labels_{model}_{which}.json"
+    fn = f"{REPO}/results/02_loops/doubt/api_fail_labels_{model}_{which}.json"
     assert not os.path.exists(fn), f"{fn} exists; not overwriting"
     json.dump(dict(model=model, subset=which, n=len(res), parse_fail=nbad, api=apicache.STATS, items=res), open(fn, "w"), indent=0)
     print(f"wrote {fn}; parse fail {nbad}/{len(res)}; {apicache.STATS}")

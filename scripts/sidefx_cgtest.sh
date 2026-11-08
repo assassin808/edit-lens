@@ -10,7 +10,7 @@
 cd /scratch/yang0531/blf_sidefx
 export PY=/scratch/yang0531/resft/env/bin/python PYTHONPATH=/scratch/yang0531/blf_models/pylib:/scratch/yang0531/blf_models/pylib_sidefx MATHVERIFY_PKGS=/scratch/yang0531/blf_models/pylib_sidefx
 export HF_HOME=/scratch/yang0531/noise_pilot/hf_cache VLLM_USE_FLASHINFER_SAMPLER=0 TOKENIZERS_PARALLELISM=false
-O=/scratch/yang0531/blf_data/sidefx; B=/scratch/yang0531/blf_models/base; S=notes/sidefx/specs
+O=/scratch/yang0531/blf_data/sidefx; B=/scratch/yang0531/blf_models/base; S=results/02_loops/overshoot/sidefx/specs
 $PY scripts/sidefx_cgtest.py $B $S/clampp5.json full_decode_only $O/cg_clampp5_full.json 2>&1 | grep -E "HOOKS|CGTEST|Error|Traceback" 
 $PY scripts/sidefx_cgtest.py $B $S/clampp5.json none $O/cg_clampp5_none.json 2>&1 | grep -E "HOOKS|CGTEST|Error|Traceback"
 $PY scripts/sidefx_cgtest.py $B none full_decode_only $O/cg_base_full.json 2>&1 | grep -E "HOOKS|CGTEST|Error|Traceback"

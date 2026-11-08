@@ -1,6 +1,6 @@
 """Shared helpers for tests 3 and 8 (branch yang/t3-t8): corpus loading, prompts, loop mask, model paths.
 
-Model dirs (rebuilt locally on Killarney, see notes/test3_neurons.md):
+Model dirs (rebuilt locally on Killarney, see results/02_loops/neurons/test3_neurons.md):
   base  = Qwen/Qwen3.5-0.8B @ 2fc06364715b967f1860aea9cf38778875588b17
   p50c  = base + astra_logs/exp8_math/runs/p50c/edit via astra_logs/exp8_math/code/apply_edit.py (sha256-checked)
 """
@@ -18,7 +18,7 @@ def weights_file(tag):
     import glob as _g
     return sorted(_g.glob(f"{MODEL_DIR[tag]}/model*.safetensors"))[0]
 INSTR = "Please reason step by step, and put your final answer within \\boxed{}."   # Astra mathqa.INSTRUCTION
-DATA_OUT = os.environ.get("T38_DATA") or (f"{os.environ['BLF_DATA']}/t38" if os.environ.get("BLF_DATA") else f"{REPO}/notes/t38_data")   # large per-sample outputs (gitignored)
+DATA_OUT = os.environ.get("T38_DATA") or (f"{os.environ['BLF_DATA']}/t38" if os.environ.get("BLF_DATA") else f"{REPO}/results/02_loops/t38_data")   # large per-sample outputs (gitignored)
 
 
 def loop_mask(ids, n=32):

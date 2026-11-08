@@ -1,5 +1,5 @@
-"""Write the edit specs (hook form) for the side-effect arms from notes/sidefx_design.json (pre-registered design).
-    python scripts/sidefx_specs.py notes/sidefx_design.json notes/sidefx/specs"""
+"""Write the edit specs (hook form) for the side-effect arms from results/02_loops/overshoot/sidefx_design.json (pre-registered design).
+    python scripts/sidefx_specs.py results/02_loops/overshoot/sidefx_design.json results/02_loops/overshoot/sidefx/specs"""
 import sys, json, os, numpy as np
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 d = json.load(open(sys.argv[1])); out = sys.argv[2]; os.makedirs(out, exist_ok=True)

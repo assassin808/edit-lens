@@ -62,4 +62,4 @@ for name, ws in variants:
     b = res["base"]; print(f"{name:26s} loop {lo:.3f} ({lo-b['loop']:+.3f})  prod {pr:.3f} ({pr-b['prod']:+.3f})", flush=True)
 rd = [v for k, v in res.items() if k.startswith("rand_dir")]
 print(f"\nrandom directions (n={len(rd)}): Δloop mean {np.mean([v['loop']-res['base']['loop'] for v in rd]):+.4f} max {np.max([v['loop']-res['base']['loop'] for v in rd]):+.4f}; Astra α6 Δloop {res['astra_alpha6']['loop']-res['base']['loop']:+.4f}")
-json.dump(res, open("notes/q4b_tf_sweep.json", "w"), indent=1)
+json.dump(res, open("results/02_loops/cheap_score/q4b_tf_sweep.json", "w"), indent=1)

@@ -108,4 +108,4 @@ for v in variants:
         results[v]["loop"].append(nl.mean().item()); results[v]["prod"].append(npd.mean().item())
     print(f"{v:14s} NLL loop {np.mean(results[v]['loop']):.3f}  NLL prod {np.mean(results[v]['prod']):.3f}   "
           f"(Δ vs base: loop {np.mean(results[v]['loop'])-np.mean(results['base']['loop']):+.3f}, prod {np.mean(results[v]['prod'])-np.mean(results['base']['prod']):+.3f})", flush=True)
-json.dump(results, open("notes/q4_tf_interventions.json", "w"), indent=1)
+json.dump(results, open("results/02_loops/steering/q4_tf_interventions.json", "w"), indent=1)

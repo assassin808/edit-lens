@@ -12,7 +12,7 @@ Backends (EXPLAINER env):
                 the judge returns a 0-100 score per excerpt -> score/100 is used as P(fires).
   vllm:<model>  local model; per-excerpt P(Yes) from first-token logprobs (bx protocol), e.g. vllm:Qwen/Qwen3-14B.
 Any backend = a class with generate(prompts) -> list[str] and score_batch(list of (desc, excerpts)) -> list[list[float]].
-    python scripts/test3_explain.py [MAXT] [subset]    out: notes/test3_autointerp_{MAXT}_{model}.json
+    python scripts/test3_explain.py [MAXT] [subset]    out: results/02_loops/neurons/test3_autointerp_{MAXT}_{model}.json
 subset: 'all' (default) or an int k = only the first k Astra neurons per layer + 4 random per layer (spot checks).
 """
 import os, sys, json, math, random, re, collections, concurrent.futures as cf
@@ -158,5 +158,5 @@ tag = name.split("/")[-1] + ("" if SUBSET == "all" else f"_sub{SUBSET}") + f"_{R
 json.dump(dict(explainer=EXPL, MAXT=MAXT, n_ctx=PR["n_ctx"], split_check=PR["split_check"], exemplar_summary=PR["exemplar_summary"],
                scoring="batched 0-100 scores per (neuron, description)" if kind == "api" else "per-excerpt P(Yes) logprobs",
                missing_scores=getattr(X, "missing", 0), empty_descriptions=sum(not x["desc"] for x in out),
-               summary=S, neurons=out), open(f"{REPO}/notes/test3_autointerp_{MAXT}_{tag}.json", "w"), indent=1)
-print("wrote", f"notes/test3_autointerp_{MAXT}_{tag}.json")
+               summary=S, neurons=out), open(f"{REPO}/results/02_loops/neurons/test3_autointerp_{MAXT}_{tag}.json", "w"), indent=1)
+print("wrote", f"results/02_loops/neurons/test3_autointerp_{MAXT}_{tag}.json")

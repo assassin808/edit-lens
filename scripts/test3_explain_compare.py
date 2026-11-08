@@ -1,7 +1,7 @@
 """Test 3c spot check: compare the Opus spot-check run (subset) with the main Sonnet run on the same neurons:
 per-neuron AP differences (description and controls, both negative sets) and whether the two descriptions name the same trigger
 (judged by the main judge model, Yes/No).
-    python scripts/test3_explain_compare.py <main.json> <spot.json> [judge_model]   out: notes/test3_autointerp_compare_<RUNTAG>.json
+    python scripts/test3_explain_compare.py <main.json> <spot.json> [judge_model]   out: results/02_loops/neurons/test3_autointerp_compare_<RUNTAG>.json
 """
 import os, sys, json
 import numpy as np
@@ -30,4 +30,4 @@ for g, sel in [("astra", lambda x: not x["is_random"]), ("random", lambda x: x["
                 **{f"{k}_{w}": m(f"{k}_{w}", sel) for k in ["ap_desc_negm", "ap_desc_negn", "ap_desc_loop_negn", "ap_desc_shuf_negn"] for w in ["main", "spot"]})
 print(json.dumps(S, indent=1))
 json.dump(dict(main=sys.argv[1], spot=sys.argv[2], judge=judge, summary=S, neurons=rows),
-          open(f"{REPO}/notes/test3_autointerp_compare_{RUNTAG}.json", "w"), indent=1)
+          open(f"{REPO}/results/02_loops/neurons/test3_autointerp_compare_{RUNTAG}.json", "w"), indent=1)

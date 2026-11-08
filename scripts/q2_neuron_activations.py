@@ -99,4 +99,4 @@ for L in [15, 19]:
     print(f"   top-10 loop-selective neurons overall: {rank[:10].tolist()}  (selected? {[int(j in set(c.tolist())) for j in rank[:10].tolist()]})")
 json.dump(dict(per_text=per_text, cols={L: geo[L]["cols"].tolist() for L in geo},
                dprime={L: torch.stack(summary[L]).mean(0).tolist() for L in summary if summary[L]}),
-          open("notes/q2_neuron_activations.json", "w"))
+          open("results/02_loops/neurons/q2_neuron_activations.json", "w"))

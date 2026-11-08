@@ -28,6 +28,6 @@ run $R/p25c p25c $S
 # full MATH-500, Astra's exact setting (32k, 4 samples)
 run $R/base base_full32k --sets math500 --n 500 --samples 4 --max-tokens 32768
 run $R/p50c p50c_full32k --sets math500 --n 500 --samples 4 --max-tokens 32768
-conda run -n vllm python scripts/steer_eval.py 0,0.5,1,2 --n 100 --max-tokens 8192 --batch 16 > notes/steer_eval.log 2>&1
+conda run -n vllm python scripts/steer_eval.py 0,0.5,1,2 --n 100 --max-tokens 8192 --batch 16 > results/02_loops/steering/steer_eval.log 2>&1
 echo "[queue] steering done $(date)"
 echo "[queue] all done $(date)"

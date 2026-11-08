@@ -11,7 +11,7 @@
 cd /scratch/yang0531/blf_sidefx
 export PY=/scratch/yang0531/resft/env/bin/python PYTHONPATH=/scratch/yang0531/blf_models/pylib:/scratch/yang0531/blf_models/pylib_sidefx MATHVERIFY_PKGS=/scratch/yang0531/blf_models/pylib_sidefx
 export HF_HOME=/scratch/yang0531/noise_pilot/hf_cache VLLM_USE_FLASHINFER_SAMPLER=0 TOKENIZERS_PARALLELISM=false OMP_NUM_THREADS=2
-B=/scratch/yang0531/blf_models/base; P=/scratch/yang0531/blf_models/p50c; S=notes/sidefx/specs; O=/scratch/yang0531/blf_data/sidefx
+B=/scratch/yang0531/blf_models/base; P=/scratch/yang0531/blf_models/p50c; S=results/02_loops/overshoot/sidefx/specs; O=/scratch/yang0531/blf_data/sidefx
 mkdir -p $O/pilot/logs; nvidia-smi --query-gpu=name --format=csv,noheader; date
 for arm in p50c p50chook clampp5 loopsel clampmean a3 base; do
   case $arm in base) M=$B; SP="";; p50c) M=$P; SP="";; *) M=$B; SP="--spec $S/$arm.json";; esac

@@ -1,4 +1,4 @@
-"""Experiment B: paraphrase-loop detector (pre-registered in notes/expB_paraphrase_loops.md).
+"""Experiment B: paraphrase-loop detector (pre-registered in results/02_loops/doubt/expB_paraphrase_loops.md).
 
 Stages:
   build   -> collect texts of every group, classify, segment, embed, score pairs; writes {out}/texts_{tag}.jsonl.gz + emb npz

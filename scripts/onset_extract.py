@@ -1,5 +1,5 @@
 """Loop-onset analysis, stage 1 (CPU): onset, stated answers (graded), loop content, per trace.
-Definitions pre-registered in notes/loop_onset.md.
+Definitions pre-registered in results/02_loops/doubt/loop_onset.md.
 
     python scripts/onset_extract.py SOURCE OUT [MAX_TRACES]
 SOURCE: fresh (gen_base_p0+p1), astra (Astra unedited logs gsm8k+math500), hard (gen_base_hard).

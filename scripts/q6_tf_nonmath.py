@@ -49,4 +49,4 @@ for ds in sets:
         if not b or not b["prod"]: continue
         lb = f"{np.mean(b['loop']):.3f} → {np.mean(e['loop']):.3f}" if b["loop"] else "—"
         print(f"{ds} {cls}-texts | {len(b['prod'])} | {lb} | {np.mean(b['prod']):.3f} → {np.mean(e['prod']):.3f}")
-json.dump({f"{k[0]}|{k[1]}|{k[2]}": v for k, v in res.items()}, open("notes/q6_tf_nonmath.json", "w"), indent=1)
+json.dump({f"{k[0]}|{k[1]}|{k[2]}": v for k, v in res.items()}, open("results/02_loops/generality/q6_tf_nonmath.json", "w"), indent=1)

@@ -1,6 +1,6 @@
-"""Analysis of the LLM failure labels (notes/api_failure_labels.md).
+"""Analysis of the LLM failure labels (results/02_loops/doubt/api_failure_labels.md).
     python scripts/api/fail_analyze.py <out.json>
-Reads notes/api_fail_labels_claude-sonnet-5-5_all.json (+ kappa50 files of Sonnet and gpt-oss-120b). Re-parses malformed JSON with the
+Reads results/02_loops/doubt/api_fail_labels_claude-sonnet-5-5_all.json (+ kappa50 files of Sonnet and gpt-oss-120b). Re-parses malformed JSON with the
 field-wise fallback in fail_label.parse. Correct-stratum items of base_nothink / p50c_nothink are weighted by population/sample size
 where pooled over strata (Q3)."""
 import json, sys, collections, random, os
@@ -8,7 +8,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fail_label as F
 OUT = sys.argv[1]; assert not os.path.exists(OUT), "exists; not overwriting"
-R = json.load(open(f"{F.REPO}/notes/api_fail_labels_claude-sonnet-5-5_all.json"))["items"]
+R = json.load(open(f"{F.REPO}/results/02_loops/doubt/api_fail_labels_claude-sonnet-5-5_all.json"))["items"]
 for x in R: x["L"] = x["label"] or F.parse(x["raw"])
 nfail = sum(x["L"] is None for x in R); R = [x for x in R if x["L"] is not None]
 ARMS = ["p50c_think", "base_nothink", "p50c_nothink", "base_think", "p50chook_think", "clampp5_think", "loopsel_think", "clampmean_think", "a3_think"]
@@ -92,8 +92,8 @@ res["F3_doubt_after_first"] = F3
 def kappa(a, b):
     cats = sorted(set(a) | set(b), key=str); n = len(a); po = np.mean([x == y for x, y in zip(a, b)])
     pe = sum((a.count(c) / n) * (b.count(c) / n) for c in cats); return float((po - pe) / (1 - pe)) if pe < 1 else 1.0, float(po)
-S = {x["uid"]: x for x in json.load(open(f"{F.REPO}/notes/api_fail_labels_claude-sonnet-5-5_kappa50.json"))["items"]}
-O = {x["uid"]: x for x in json.load(open(f"{F.REPO}/notes/api_fail_labels_gpt-oss-120b_kappa50.json"))["items"]}
+S = {x["uid"]: x for x in json.load(open(f"{F.REPO}/results/02_loops/doubt/api_fail_labels_claude-sonnet-5-5_kappa50.json"))["items"]}
+O = {x["uid"]: x for x in json.load(open(f"{F.REPO}/results/02_loops/doubt/api_fail_labels_gpt-oss-120b_kappa50.json"))["items"]}
 pairs = []
 for u in S:
     ls, lo = S[u]["label"] or F.parse(S[u]["raw"]), O[u]["label"] or F.parse(O[u]["raw"])

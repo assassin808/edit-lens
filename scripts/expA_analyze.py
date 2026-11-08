@@ -1,7 +1,7 @@
 """Experiment A analysis: AUC (positive = incorrect candidate) of each signal, bootstrap CI, per (model, traces) arm.
 
     python scripts/expA_analyze.py OUT_TAG ARM [ARM ...]      ARM = meas file stem without 'meas_' (e.g. base_on_gen-base)
-Out: notes/expA_results_{OUT_TAG}.json, notes/fig/expA_pdoubt_{OUT_TAG}.png (refuses to overwrite).
+Out: results/02_loops/doubt/expA_results_{OUT_TAG}.json, results/02_loops/doubt/fig/expA_pdoubt_{OUT_TAG}.png (refuses to overwrite).
 """
 import json, os, sys
 import numpy as np

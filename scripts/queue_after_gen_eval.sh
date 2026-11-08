@@ -4,7 +4,7 @@ cd /data/behavioral-lens-fast
 R=/data2/ec2-user/models/qwen3.5-0.8b-astra
 while pgrep -f run_gen_evals.sh > /dev/null; do sleep 60; done
 echo "[queue] gen eval finished $(date)"
-conda run -n vllm python scripts/q4b_tf_sweep.py > notes/q4b_tf_sweep.log 2>&1
+conda run -n vllm python scripts/q4b_tf_sweep.py > results/02_loops/cheap_score/q4b_tf_sweep.log 2>&1
 echo "[queue] TF sweep done $(date)"
 conda run -n vllm python scripts/build_variants.py sel_alpha1 sel_alpha4 sel_alpha8 top64_combined_alpha6 top64_dprime_alpha6 rand_dir00 rand_dir01 rand_dir02 2>&1 | grep -v -i warning
 S="--n 100 --samples 1 --max-tokens 16384"

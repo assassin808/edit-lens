@@ -37,4 +37,4 @@ print(f"\ncos(u15, u19) = {torch.dot(us[15], us[19]):.4f}")
 for L, u in us.items():
     top = u.abs().topk(5)
     print(f"L{L} u: top |dims| {top.indices.tolist()} values {[round(v,3) for v in top.values.tolist()]}, participation ratio {(u.abs().sum()**2/(u**2).sum()).item():.0f}/1024")
-json.dump(out, open("notes/q1_rank1_structure_p50c.json", "w"))
+json.dump(out, open("results/02_loops/weights/q1_rank1_structure_p50c.json", "w"))

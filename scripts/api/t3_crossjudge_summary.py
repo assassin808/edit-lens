@@ -1,15 +1,15 @@
-"""Summarise the cross-family re-judging (notes/api_judge_crossfamily.md).
+"""Summarise the cross-family re-judging (results/02_loops/doubt/api_judge_crossfamily.md).
     python scripts/api/t3_crossjudge_summary.py <out.json>"""
 import json, sys, os, random
 import numpy as np
 from scipy.stats import spearmanr
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = sys.argv[1]; assert not os.path.exists(OUT)
-RUNS = {("sonnet", "sonnet", "orig"): "notes/test3_autointerp_32768_claude-sonnet-5-5_killarney.json",
-        ("sonnet", "sonnet", "retest"): "notes/api_t3_sonnet__claude-sonnet-5-5_desc-desc_shuf.json",
-        ("sonnet", "gpt-oss"): "notes/api_t3_sonnet__gpt-oss-120b.json",
-        ("gpt-oss", "gpt-oss"): "notes/api_t3_gpt-oss-120b__gpt-oss-120b.json",
-        ("gpt-oss", "sonnet"): "notes/api_t3_gpt-oss-120b__claude-sonnet-5-5_desc-desc_shuf.json"}
+RUNS = {("sonnet", "sonnet", "orig"): "results/02_loops/neurons/test3_autointerp_32768_claude-sonnet-5-5_killarney.json",
+        ("sonnet", "sonnet", "retest"): "results/02_loops/doubt/api_t3_sonnet__claude-sonnet-5-5_desc-desc_shuf.json",
+        ("sonnet", "gpt-oss"): "results/02_loops/doubt/api_t3_sonnet__gpt-oss-120b.json",
+        ("gpt-oss", "gpt-oss"): "results/02_loops/doubt/api_t3_gpt-oss-120b__gpt-oss-120b.json",
+        ("gpt-oss", "sonnet"): "results/02_loops/doubt/api_t3_gpt-oss-120b__claude-sonnet-5-5_desc-desc_shuf.json"}
 G = {"astra_L15": lambda x: not x["is_random"] and x["layer"] == 15, "astra_L19": lambda x: not x["is_random"] and x["layer"] == 19,
      "random": lambda x: x["is_random"]}
 D = {k: {(x["layer"], x["unit"]): x for x in json.load(open(f"{REPO}/{v}"))["neurons"]} for k, v in RUNS.items() if os.path.exists(f"{REPO}/{v}")}

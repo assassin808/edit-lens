@@ -9,7 +9,7 @@ For every downstream component X (heads of mixers L16-23, mixer blocks, MLP bloc
   controls  inject Gaussian noise with Delta_X's per-position norm / position-permuted Delta_X
 Plus: copy (induction) attention of full-attn heads L15/19/23, logit lens of top mediators' Delta, L15 h7 sanity.
 
-    python scripts/test5_paths.py N MAXT TAG        (out: notes/test5_paths_{TAG}.json, $T5_DATA/test5_{TAG}.pt)
+    python scripts/test5_paths.py N MAXT TAG        (out: results/02_loops/paths/test5_paths_{TAG}.json, $T5_DATA/test5_{TAG}.pt)
 """
 import glob, gzip, json, os, sys, time
 import numpy as np, torch
@@ -364,7 +364,7 @@ sn = [n for n in COMP]
 S["atp_vs_inject_spearman"] = dict(base=float(spearmanr([comp[n]["atp_base"] for n in sn], [comp[n]["inject"] for n in sn])[0]),
                                    edit=float(spearmanr([comp[n]["atp_edit"] for n in sn], [comp[n]["inject"] for n in sn])[0]),
                                    mean=float(spearmanr([comp[n]["atp_mean"] for n in sn], [comp[n]["inject"] for n in sn])[0]))
-json.dump(S, open(f"{REPO}/notes/test5_paths_{TAG}.json", "w"), indent=1)
+json.dump(S, open(f"{REPO}/results/02_loops/paths/test5_paths_{TAG}.json", "w"), indent=1)
 torch.save(R, f"{DATA}/test5_{TAG}.pt")
 print(f"\nn={len(R)} texts x {MAXT} tok, {S['n_loop_pos']} loop positions; M base {S['M_base']:.4f} edit {S['M_edit']:.4f} total {tot:+.4f}; "
       f"L15-only {S['edit15only']:+.4f} L19-only {S['edit19only']:+.4f}; id_err {S['id_err']:.1e}")

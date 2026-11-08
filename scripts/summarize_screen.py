@@ -1,9 +1,9 @@
-"""Re-summarize notes/screen/*.jsonl (strict + lenient accuracy, completion, loop-end, no-box) and print a table."""
+"""Re-summarize results/01_behaviour/screen/*.jsonl (strict + lenient accuracy, completion, loop-end, no-box) and print a table."""
 import glob, json, os, sys
 sys.path.insert(0, "scripts")
 from astra_eval import grade_lenient
 rows = []
-for f in sorted(glob.glob("notes/screen/*.jsonl")):
+for f in sorted(glob.glob("results/01_behaviour/screen/*.jsonl")):
     if f.endswith("summary.jsonl"): continue
     R = [json.loads(l) for l in open(f)]
     for x in R:
@@ -15,4 +15,4 @@ for f in sorted(glob.glob("notes/screen/*.jsonl")):
                          loop_end=sum(x["loop_end"] for x in S)/len(S), no_box=sum(1 for x in done if x["pred"] is None)/len(S), mean_tokens=sum(x["n_tokens"] for x in S)/len(S)))
 print("tag | set | n | completion | acc | acc_lenient | acc_on_completed | loop_end | no_box_finished | mean_tokens")
 for r in rows: print(f"{r['tag']} | {r['set']} | {r['n']} | {r['completion']:.2f} | {r['acc']:.3f} | {r['acc_lenient']:.3f} | {r['acc_on_completed']:.3f} | {r['loop_end']:.2f} | {r['no_box']:.2f} | {r['mean_tokens']:.0f}")
-json.dump(rows, open("notes/screen/table.json", "w"), indent=1)
+json.dump(rows, open("results/01_behaviour/screen/table.json", "w"), indent=1)

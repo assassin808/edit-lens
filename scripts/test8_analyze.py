@@ -1,5 +1,5 @@
 """Test 8 (CPU): numbers + figures from scripts/test8_tf.py and scripts/test3_collect.py.
-    python scripts/test8_analyze.py [MAXT] [out_json]     default out: notes/test8_results_{MAXT}.json, figures notes/fig/test8_*.png
+    python scripts/test8_analyze.py [MAXT] [out_json]     default out: results/02_loops/states/test8_results_{MAXT}.json, figures results/02_loops/states/fig/test8_*.png
 """
 import os, sys, json
 import numpy as np, torch
@@ -9,8 +9,8 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 
 MAXT = int(sys.argv[1]) if len(sys.argv) > 1 else 16384
 SUF = os.environ.get("SUFFIX", "")
-OUT = sys.argv[2] if len(sys.argv) > 2 else f"{REPO}/notes/test8_results_{MAXT}{SUF}_{RUNTAG}.json"
-FIG = f"{REPO}/notes/fig"; os.makedirs(FIG, exist_ok=True)
+OUT = sys.argv[2] if len(sys.argv) > 2 else f"{REPO}/results/02_loops/states/test8_results_{MAXT}{SUF}_{RUNTAG}.json"
+FIG = f"{REPO}/results/02_loops/states/fig"; os.makedirs(FIG, exist_ok=True)
 T8 = torch.load(f"{DATA_OUT}/t8_tf_{MAXT}{SUF}.pt", weights_only=False)
 PS = T8["passes"]; res = dict(MAXT=MAXT, probe=T8["probe_report"], passes={})
 sig = lambda x: 1 / (1 + np.exp(-np.asarray(x, np.float64)))

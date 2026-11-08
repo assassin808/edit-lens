@@ -4,14 +4,14 @@
 #      BLF_PY (python with torch + transformers>=5.11 [+ flash-linear-attention], sklearn, matplotlib),
 #      optional BLF_VLLM_PY (python with vllm, for the thinking-off generations; else transformers fallback),
 #      BLF_RUNTAG (suffix of committed result files; default = cluster name), T38_MAXT (default 32768 = full length), T38_NPC (default 100).
-# cwd = a checkout of yang/t3-t8. Writes notes/test3_*, notes/test8_*, notes/fig/test8_* and commits them locally (no push).
+# cwd = a checkout of yang/t3-t8. Writes results/02_loops/neurons/test3_*, results/02_loops/states/test8_*, results/02_loops/states/fig/test8_* and commits them locally (no push).
 set -euo pipefail
 PY=${BLF_PY:-python}; VPY=${BLF_VLLM_PY:-$PY}
 export T38_DATA=${BLF_DATA:?set BLF_DATA}/t38 PYTHONPATH=$PWD/scripts${PYTHONPATH:+:$PYTHONPATH} VLLM_USE_FLASHINFER_SAMPLER=0
 export BLF_RUNTAG=${BLF_RUNTAG:-${CC_CLUSTER:-$(hostname -s | sed 's/[0-9]*$//')}}
 MAXT=${T38_MAXT:-32768}; NPC=${T38_NPC:-100}
-mkdir -p "$T38_DATA" notes/fig
-LOG=notes/test38_run_${BLF_RUNTAG}.log
+mkdir -p "$T38_DATA" results/02_loops/states/fig
+LOG=results/02_loops/states/test38_run_${BLF_RUNTAG}.log
 exec > >(tee -a "$LOG") 2>&1
 echo "== $(date) runtag=$BLF_RUNTAG MAXT=$MAXT NPC=$NPC base=$BLF_MODEL_BASE p50c=$BLF_MODEL_P50C"
 nvidia-smi --query-gpu=name --format=csv,noheader || true
@@ -59,9 +59,9 @@ $PY scripts/test3_explain_prep.py $MAXT
 $PY scripts/test8_tf.py $MAXT $NPC
 $PY scripts/test8_analyze.py $MAXT
 echo "full done $(( $(date +%s) - T0 ))s"
-git add notes/test3a_ranking_*_${BLF_RUNTAG}.json notes/test3_exemplar*_${BLF_RUNTAG}.* notes/test8_results_*_${BLF_RUNTAG}.json \
-        notes/fig/test8_*_${BLF_RUNTAG}.png "$LOG" 2>/dev/null || true
-cp "$T38_DATA"/gen_base_nothink_summary.json notes/test8_gen_nothink_summary_${BLF_RUNTAG}.json && git add notes/test8_gen_nothink_summary_${BLF_RUNTAG}.json
+git add results/02_loops/neurons/test3a_ranking_*_${BLF_RUNTAG}.json results/02_loops/neurons/test3_exemplar*_${BLF_RUNTAG}.* results/02_loops/states/test8_results_*_${BLF_RUNTAG}.json \
+        results/02_loops/states/fig/test8_*_${BLF_RUNTAG}.png "$LOG" 2>/dev/null || true
+cp "$T38_DATA"/gen_base_nothink_summary.json results/01_behaviour/test8_gen_nothink_summary_${BLF_RUNTAG}.json && git add results/01_behaviour/test8_gen_nothink_summary_${BLF_RUNTAG}.json
 git -c user.name="${GIT_NAME:-blf-runner}" -c user.email="${GIT_EMAIL:-blf-runner@localhost}" commit -qm "t3/t8 GPU results ($BLF_RUNTAG, MAXT=$MAXT, NPC=$NPC)
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git log --oneline -1

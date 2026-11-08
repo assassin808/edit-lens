@@ -2,7 +2,7 @@
     python scripts/api/handcheck_show.py <start> <end>"""
 import json, random, sys, re
 import fail_label as F
-P = json.load(open(f"{F.REPO}/notes/api_fail_labels_claude-sonnet-5-5_all.json"))["items"]
+P = json.load(open(f"{F.REPO}/results/02_loops/doubt/api_fail_labels_claude-sonnet-5-5_all.json"))["items"]
 rng = random.Random("hand-0"); pick = []
 for arms, k in [(["p50c_think"], 8), (["base_nothink"], 6), (["p50c_nothink"], 2), (["base_think"], 2),
                 (["p50chook_think", "clampp5_think", "loopsel_think", "clampmean_think", "a3_think"], 2)]:

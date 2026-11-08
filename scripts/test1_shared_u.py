@@ -1,11 +1,11 @@
 """Test 1: recover u per layer, Astra's 64 columns, index-skew check, and a re-ranking of all 3584 neurons by loop selectivity
-(from notes/q2_neuron_activations.json, d' of |act| loop vs productive) and by |uᵀw_j|.  Writes shared/."""
+(from results/02_loops/neurons/q2_neuron_activations.json, d' of |act| loop vs productive) and by |uᵀw_j|.  Writes shared/."""
 import json, numpy as np, torch
 from scipy import stats
 from safetensors.torch import load_file
 ROOT = "/data2/ec2-user/models/qwen3.5-0.8b-astra"
 base = load_file(f"{ROOT}/base/model.safetensors"); edit = load_file(f"{ROOT}/p50c/model.safetensors")
-q2 = json.load(open("notes/q2_neuron_activations.json"))
+q2 = json.load(open("results/02_loops/neurons/q2_neuron_activations.json"))
 out = {}
 for L in [15, 19]:
     n = f"model.language_model.layers.{L}.mlp.down_proj.weight"; W0, W1 = base[n].float(), edit[n].float(); D = W1 - W0

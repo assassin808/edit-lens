@@ -7,8 +7,8 @@ sets for Astra's 128 neurons (+16 random neurons per layer as reference), render
   splits  : explanation set = top[0::2][:8]; held-out positives = top[1::2][:8] minus any whose 7-token peak context occurs in the
             explanation set; negatives = random tokens, 'matched' (same source + same loop status as each positive, bx protocol) and
             'nonloop' (same source, outside repeated passages), drawn without replacement.
-    python scripts/test3_explain_prep.py [MAXT]   out: $T38_DATA/t3_explain_prep_{MAXT}.json, notes/test3_exemplars_{MAXT}.md,
-                                                       notes/test3_exemplar_summary_{MAXT}.json
+    python scripts/test3_explain_prep.py [MAXT]   out: $T38_DATA/t3_explain_prep_{MAXT}.json, results/02_loops/neurons/test3_exemplars_{MAXT}.md,
+                                                       results/02_loops/neurons/test3_exemplar_summary_{MAXT}.json
 Then scripts/test3_explain.py (explainer + detection scoring; can run on the login node with an API backend).
 """
 import os, sys, json, math, random, collections
@@ -90,14 +90,14 @@ for n in N:
     md.append(f"\n## L{n['layer']}.{n['unit']}  top-16 loop share {n['top_loop_share']:.2f}, sources {n['top_src']}\npromotes: {n['promotes'][:8]}\n")
     for w in n["top"][:4]:
         md.append(f"- ({meta[w['ctx']]['src']}, {'loop' if w['in_loop'] else 'non-loop'}, c={w['val']:.3f}) `{render(w, w['acts'])}`")
-open(f"{REPO}/notes/test3_exemplars_{MAXT}_{RUNTAG}.md", "w").write("\n".join(md) + "\n")
+open(f"{REPO}/results/02_loops/neurons/test3_exemplars_{MAXT}_{RUNTAG}.md", "w").write("\n".join(md) + "\n")
 summ_ex = {grp: dict(n=len(xs), top16_loop_share=float(np.mean([x["top_loop_share"] for x in xs])),
                      top16_src=dict(sum((collections.Counter(x["top_src"]) for x in xs), collections.Counter())))
            for grp, xs in [("astra_L15", [n for n in N if not n["is_random"] and n["layer"] == 15]),
                            ("astra_L19", [n for n in N if not n["is_random"] and n["layer"] == 19]),
                            ("random", [n for n in N if n["is_random"]])]}
 print(json.dumps(summ_ex, indent=1), flush=True)
-json.dump(dict(exemplar_summary=summ_ex), open(f"{REPO}/notes/test3_exemplar_summary_{MAXT}_{RUNTAG}.json", "w"), indent=1)
+json.dump(dict(exemplar_summary=summ_ex), open(f"{REPO}/results/02_loops/neurons/test3_exemplar_summary_{MAXT}_{RUNTAG}.json", "w"), indent=1)
 def pack(w, acts, peak_only=False): return dict(seg=seg(w), segkey=list(segkey(w)), text=render(w, acts, peak_only=peak_only), ctx=w["ctx"], pos=int(w["pos"]))
 P_ = []
 for n in N:
