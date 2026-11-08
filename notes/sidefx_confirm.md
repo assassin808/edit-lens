@@ -108,3 +108,22 @@ whitespace), no-box among finished (`pred is None` and not cut), cut-after-`</th
   - job 7321423: MATH-500 250–374, both arms.
   - MATH-500 375–499 runs only if the budget allows.
 - Missing chunks, if any, are listed with the results. The criteria are evaluated on whatever completed, labelled as such.
+
+### Result (stage 1, 16k; analysed 2026-11-07 with the registered script, unchanged)
+Complete: MATH-500 0–499 and GSM8K 0–499, 2 samples each, both arms (jobs 7303913 for MATH 0–249, 7321422 for GSM8K, 7322075 for
+MATH 250–499). Command: `scripts/sidefx_confirm_analyze.py notes/sidefx_confirm/result_confirm_16k_all.json ref=…p50chook_*_16k_s1.jsonl
+trt=…clampp5_*_16k_s1.jsonl`. Output: `notes/sidefx_confirm/result_confirm_16k_all.json`.
+
+- **KH (harness drift): pass.** p50chook pooled loop_end 0.060 (≤ 0.15); completion 0.547 vs screen 0.56 (within 0.10).
+- **Primary: confirmed.** Whitespace runaways 89/2,000 (p50chook) vs 49/2,000 (clampp5), difference −0.020
+  [95% CI −0.031, −0.010], ratio 0.55, one-sided paired permutation p = 0.0002. Same direction on each set
+  (GSM8K 36 vs 21, p = 0.027; MATH-500 53 vs 28, p = 0.002) and on the 600 fresh problems (54 vs 32, p = 0.007).
+- **NI-loop: holds.** loop_end 0.060 vs 0.069, difference +0.009, one-sided upper bound +0.021 (margin +0.03).
+- **NI-acc: holds.** acc_all 0.453 vs 0.453, difference 0.000, one-sided lower bound −0.015 (margin −0.03).
+  Paired accuracy on problems both arms finish: 0.836 vs 0.837 (n = 578).
+- P1 (ratio ≈ 0.5, 0.3–0.7): **held** (0.55). P2, P3: **held**. P4: no-box and cut-after-think do not differ pooled
+  (MATH-500 no-box is lower for clampp5, 3/307 vs 11/322; exploratory).
+- **Verdict.** Clipping only the far tail of the overshoot (5th percentile of normal states) roughly halves whitespace
+  runaways without giving back the loop fix or accuracy, at 16k. Caveats: one seed, hook implementation (not a weight edit),
+  16k only (no 32k accuracy), completion is 1.5 pt lower (CI includes 0).
+- **GPU-h for this branch:** pilot 0.24 + 3.0 (timed out) + 1.62 + 1.16 ≈ 6.0 L40S GPU-h (budget 8).
